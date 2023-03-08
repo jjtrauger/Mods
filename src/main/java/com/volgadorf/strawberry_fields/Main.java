@@ -43,10 +43,12 @@ public class Main {
     private void addCreative(CreativeModeTabEvent.BuildContents event) {
         if(event.getTab() == CreativeModeTabs.FOOD_AND_DRINKS) {
             event.accept(ModFoodItems.PAST_MILK);
+            event.accept(ModFoodItems.CHEEMS);
         }
 
         if(event.getTab() == ModCreativeModeTabs.VOLG_TAB) {
             event.accept(ModFoodItems.PAST_MILK);
+            event.accept(ModFoodItems.CHEEMS);
         }
     }
 
