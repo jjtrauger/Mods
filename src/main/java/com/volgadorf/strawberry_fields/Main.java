@@ -1,6 +1,7 @@
 package com.volgadorf.strawberry_fields;
 
 
+import com.volgadorf.strawberry_fields.block.ModBlocks;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +31,7 @@ public class Main {
     public Main() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModFoodItems.register(modEventBus);
+        ModBlocks.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
 
@@ -49,8 +51,11 @@ public class Main {
         if(event.getTab() == ModCreativeModeTabs.VOLG_TAB) {
             event.accept(ModFoodItems.PAST_MILK);
             event.accept(ModFoodItems.CHEEMS);
+            event.accept(ModBlocks.CHEEMS_FULL);
         }
     }
+
+
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
