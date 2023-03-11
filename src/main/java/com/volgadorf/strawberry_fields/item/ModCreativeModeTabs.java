@@ -18,12 +18,12 @@ public class ModCreativeModeTabs {
     @SubscribeEvent
     public static void registerCreativeModeTabs(CreativeModeTabEvent.Register event) {
         VOLG_TAB = event.registerCreativeModeTab(new ResourceLocation(Main.MOD_ID, "food_tab"),
-                builder -> builder.icon(() -> new ItemStack(ModFoodItems.PAST_MILK.get()))
+                builder -> builder.icon(() -> new ItemStack(ModFoodItems.CHEEMS.get()))
                         .title(Component.translatable("creativemodetab.food_tab")));
     }
 
 
- /**
+
  public void registerTabs(CreativeModeTabEvent.Register event)
  {
      VOLG_TAB = event.registerCreativeModeTab(new ResourceLocation(Main.MOD_ID, "food_tab"), builder -> builder
@@ -34,5 +34,5 @@ public class ModCreativeModeTabs {
                  output.accept(ModFoodItems.PAST_MILK.get());
              })
      );
- } **/
+ }
 }
