@@ -35,13 +35,13 @@ public class Main {
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
 
-        modEventBus.addListener(this::addCreative);
+        modEventBus.addListener(this::buildContents);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
 
     }
-
+/**
     private void addCreative(CreativeModeTabEvent.BuildContents event) {
         if(event.getTab() == CreativeModeTabs.FOOD_AND_DRINKS) {
             event.accept(ModFoodItems.PAST_MILK);
@@ -52,6 +52,15 @@ public class Main {
             event.accept(ModFoodItems.PAST_MILK);
             event.accept(ModFoodItems.CHEEMS);
             event.accept(ModBlocks.CHEEMS_FULL);
+        }
+    }
+ **/
+    @SubscribeEvent
+    public void buildContents(CreativeModeTabEvent.BuildContents event) {
+        // Add to ingredients tab
+        if (event.getTab() == CreativeModeTabs.FOOD_AND_DRINKS) {
+            event.accept(ModFoodItems.PAST_MILK);
+            event.accept(ModBlocks.CHEEMS_FULL); // Takes in an ItemLike, assumes block has registered item
         }
     }
 
