@@ -30,15 +30,14 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class Cheems_Wheel_Block extends Block {
 
-    public static final int MAX_BITES = 3;
-    public static final IntegerProperty BITES = BlockStateProperties.BITES;
+    public static final int MAX_CHEEMS_BITES = 3;
+    public static final IntegerProperty CHEEMS_BITES = IntegerProperty.create("cheems_bites", 0, 3);
 
-    protected static final float AABB_OFFSET = 1.0F;
-    protected static final float AABB_SIZE_PER_BITE = 2.0F;
     protected static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 6, 14);
 
     public Cheems_Wheel_Block(Properties properties) {
         super(properties);
+        this.registerDefaultState(this.stateDefinition.any().setValue(CHEEMS_BITES, Integer.valueOf(0)));
     }
 
     @Override
@@ -51,21 +50,35 @@ public class Cheems_Wheel_Block extends Block {
         return super.use(p_60503_, p_60504_, p_60505_, p_60506_, p_60507_, p_60508_);
     }
 
-    protected static InteractionResult eat(LevelAccessor p_51186_, BlockPos p_51187_, BlockState p_51188_, Player p_51189_) {
-        if (!p_51189_.canEat(false)) {
+    protected static InteractionResult eat(LevelAccessor p_51186_, BlockPos blockPos, BlockState blockState, Player player) {
+        //check if player has full hunger: if so, leave this method
+        if (!player.canEat(false)) {
             return InteractionResult.PASS;
+        //player is hungry
         } else {
-            p_51189_.getFoodData().eat(2, 0.1F);
-            int i = p_51188_.getValue(BITES);
-            p_51186_.gameEvent(p_51189_, GameEvent.EAT, p_51187_);
-            if (i < MAX_BITES) {
-                p_51186_.setBlock(p_51187_, p_51188_.setValue(BITES, Integer.valueOf(i + 1)), 3);
+            //restore player hunger and determine saturation
+            player.getFoodData().eat(1, 0.2F);
+
+            //variable to determine what bite we are on
+            int i = blockState.getValue(CHEEMS_BITES);
+            //trigger gameEvent calling player hunger, then EAT happens, need to know block position to change the blockstate there
+            p_51186_.gameEvent(player, GameEvent.EAT, blockPos);
+            //if block is not supposed to be depleted
+            if (i < MAX_CHEEMS_BITES) {
+                //change the blockstate
+                p_51186_.setBlock(blockPos, blockState.setValue(CHEEMS_BITES, Integer.valueOf(i + 1)), 3);
+            //if block is now fully eaten
             } else {
-                p_51186_.removeBlock(p_51187_, false);
-                p_51186_.gameEvent(p_51189_, GameEvent.BLOCK_DESTROY, p_51187_);
+                //remove the block from the game
+                p_51186_.removeBlock(blockPos, false);
+                p_51186_.gameEvent(player, GameEvent.BLOCK_DESTROY, blockPos);
             }
 
             return InteractionResult.SUCCESS;
         }
+    }
+
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_51220_) {
+        p_51220_.add(CHEEMS_BITES);
     }
 }
