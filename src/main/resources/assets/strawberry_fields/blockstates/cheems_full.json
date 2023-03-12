@@ -1,5 +1,16 @@
 {
   "variants":{
-  "": {"model": "strawberry_fields:block/cheems_full"}
+    "cheems_bites=0": {
+      "model": "strawberry_fields:block/cheems_full"
+    },
+    "cheems_bites=1": {
+      "model": "strawberry_fields:block/cheems_threefour"
+    },
+    "cheems_bites=2": {
+      "model": "strawberry_fields:block/cheems_half"
+    },
+    "cheems_bites=3": {
+      "model": "strawberry_fields:block/cheems_onefour"
+    }
 }
 }
