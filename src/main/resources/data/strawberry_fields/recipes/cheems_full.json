@@ -3,11 +3,11 @@
   "category": "food",
   "ingredients": [
     {
-      "item": "strawberry_fields:cheems_full"
+      "item": "strawberry_fields:past_milk"
     }
   ],
   "result": {
-    "count": 3,
-    "item": "strawberry_fields:cheems"
+    "count": 1,
+    "item": "strawberry_fields:cheems_full"
   }
 }
