@@ -24,7 +24,7 @@ public class ModBlocks {
             DeferredRegister.create(ForgeRegistries.BLOCKS, Main.MOD_ID);
 
     public static final RegistryObject<Block> CHEEMS_FULL = registerBlock("cheems_full",
-            () -> new Cheems_Wheel_Block(BlockBehaviour.Properties.of(Material.MOSS)
+            () -> new Cheems_Wheel_Block(BlockBehaviour.Properties.of(Material.CAKE).noOcclusion()
                     .strength(1f)), ModCreativeModeTabs.VOLG_TAB);
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block, CreativeModeTab tab) {
@@ -34,7 +34,7 @@ public class ModBlocks {
     }
 
     private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block) {
-        return ModFoodItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties().stacksTo(13)));
+        return ModFoodItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties().stacksTo(64)));
     }
 
     public static void register(IEventBus eventBus) {

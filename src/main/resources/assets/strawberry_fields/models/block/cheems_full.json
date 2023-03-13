@@ -1,8 +1,9 @@
-{"textures": {
-"0": "block/cheems_center",
-"1": "block/cheems_seconds",
-"2": "block/cheems_topbot",
-"particle": "block/cheems_center"
+{
+  "textures": {
+"0": "strawberry_fields:block/cheems_center",
+"1": "strawberry_fields:block/cheems_seconds",
+"2": "strawberry_fields:block/cheems_topbot",
+"particle": "strawberry_fields:block/cheems_center"
 },
 "elements": [
 {
