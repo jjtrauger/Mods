@@ -2,6 +2,7 @@ package com.volgadorf.strawberry_fields;
 
 
 import com.volgadorf.strawberry_fields.block.ModBlocks;
+import com.volgadorf.strawberry_fields.block.entity.ModBlockEntities;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.world.item.ItemStack;
@@ -37,6 +38,8 @@ public class Main {
 
         //modEventBus.addListener(this::addCreative);
         modEventBus.addListener(this::buildContents);
+
+        ModBlockEntities.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
