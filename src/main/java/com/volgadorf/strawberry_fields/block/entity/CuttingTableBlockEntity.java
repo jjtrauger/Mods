@@ -61,7 +61,7 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
 
     public CuttingTableBlockEntity(BlockPos p_155229_, BlockState p_155230_) {
-        super(p_155228_, p_155229_, p_155230_);
+        super(ModBlockEntities.CUTTING_TABLE.get(), p_155229_, p_155230_);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int p_39954_, Inventory p_39955_, Player p_39956_) {
-        return null;
+        return
     }
 
     @Override
@@ -82,6 +82,42 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
         }
 
         return super.getCapability(cap, side);
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        lazyItemHandler = LazyOptional.of(() -> itemHandler);
+    }
+
+    @Override
+    public void invalidateCaps() {
+        super.invalidateCaps();
+        lazyItemHandler.invalidate();
+    }
+
+    @Override
+    protected void saveAdditional(CompoundTag nbt) {
+        nbt.put("inventory", itemHandler.serializeNBT());
+        super.saveAdditional(nbt);
+    }
+
+    @Override
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
+        itemHandler.deserializeNBT(nbt.getCompound("inventory"));
+    }
+
+    public void drops(){
+        SimpleContainer inventory = new SimpleContainer(itemHandler.getSlots());
+        for (int i = 0; i < itemHandler.getSlots(); i++){
+            inventory.setItem(i, itemHandler.getStackInSlot(i));
+        }
+        Containers.dropContents(this.level, this.worldPosition, inventory);
+    }
+
+
+    public static void tick(Level level, BlockPos blockPos, BlockState state, CuttingTableBlockEntity pEntity) {
     }
 }
 
