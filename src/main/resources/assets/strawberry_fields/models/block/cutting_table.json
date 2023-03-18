@@ -1,6 +1,4 @@
 {
-  "credit": "Made with Blockbench",
-  "parent": "block/block",
   "textures": {
     "2": "strawberry_fields:block/cutting_table_knife",
     "4": "strawberry_fields:block/cutting_table_topside",

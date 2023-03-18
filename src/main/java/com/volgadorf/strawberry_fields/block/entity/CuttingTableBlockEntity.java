@@ -1,5 +1,6 @@
 package com.volgadorf.strawberry_fields.block.entity;
 
+import com.volgadorf.strawberry_fields.item.ModFoodItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -46,6 +47,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -60,19 +62,37 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
 
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
 
+    protected final ContainerData data;
+
     public CuttingTableBlockEntity(BlockPos p_155229_, BlockState p_155230_) {
         super(ModBlockEntities.CUTTING_TABLE.get(), p_155229_, p_155230_);
+        this.data = new ContainerData() {
+            @Override
+            public int get(int p_39284_) {
+                return 0;
+            }
+
+            @Override
+            public void set(int p_39285_, int p_39286_) {
+
+            }
+
+            @Override
+            public int getCount() {
+                return 0;
+            }
+        };
     }
 
     @Override
     public Component getDisplayName() {
-        return null;
+        return Component.literal("Cutting Table");
     }
 
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int p_39954_, Inventory p_39955_, Player p_39956_) {
-        return
+        return null;
     }
 
     @Override
@@ -118,6 +138,46 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
 
 
     public static void tick(Level level, BlockPos blockPos, BlockState state, CuttingTableBlockEntity pEntity) {
+        if(level.isClientSide()){
+            return;
+        }
+
+        if(hasRecipe(pEntity)){
+            setChanged(level, blockPos, state);
+            craftItem(pEntity);
+        }
+        else{
+            setChanged(level, blockPos, state);
+        }
+    }
+
+    private static void craftItem(CuttingTableBlockEntity pEntity) {
+        if (hasRecipe(pEntity)){
+            pEntity.itemHandler.extractItem(1, 1, false);
+            pEntity.itemHandler.setStackInSlot(10, new ItemStack(ModFoodItems.CHEEMS.get(),
+                    pEntity.itemHandler.getStackInSlot(10).getCount()+1));
+
+        }
+    }
+
+    private static boolean hasRecipe(CuttingTableBlockEntity entity) {
+        SimpleContainer inventory = new SimpleContainer(entity.itemHandler.getSlots());
+        for (int i = 0; i < entity.itemHandler.getSlots(); i++) {
+            inventory.setItem(i, entity.itemHandler.getStackInSlot(i));
+        }
+
+        boolean hasPastMilk = entity.itemHandler.getStackInSlot(1).getItem() == ModFoodItems.PAST_MILK.get();
+
+        return hasPastMilk && canInsertAmountIntoOutputSlot(inventory) &&
+                canInsertItemIntoOutputSlot(inventory, new ItemStack(ModFoodItems.CHEEMS.get(), 1));
+    }
+
+    private static boolean canInsertItemIntoOutputSlot(SimpleContainer inventory, ItemStack itemStack) {
+        return inventory.getItem(10).getItem() == itemStack.getItem() || inventory.getItem(10).isEmpty();
+    }
+
+    private static boolean canInsertAmountIntoOutputSlot(SimpleContainer inventory) {
+        return inventory.getItem(10).getMaxStackSize() > inventory.getItem(10).getCount();
     }
 }
 

@@ -33,13 +33,13 @@ public class Main {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModFoodItems.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModBlockEntities.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
-        MinecraftForge.EVENT_BUS.register(this);
 
         //modEventBus.addListener(this::addCreative);
         modEventBus.addListener(this::buildContents);
+        MinecraftForge.EVENT_BUS.register(this);
 
-        ModBlockEntities.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -65,10 +65,12 @@ public class Main {
         if (event.getTab() == CreativeModeTabs.FOOD_AND_DRINKS) {
             event.accept(ModFoodItems.PAST_MILK);
             event.accept(ModBlocks.CHEEMS_FULL); // Takes in an ItemLike, assumes block has registered item
+            event.accept(ModBlocks.CUTTING_TABLE);
         }
         if(event.getTab() == ModCreativeModeTabs.VOLG_TAB) {
             event.accept(ModFoodItems.PAST_MILK);
             event.accept(ModBlocks.CHEEMS_FULL);
+            event.accept(ModBlocks.CUTTING_TABLE);
         }
     }
 

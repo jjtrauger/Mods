@@ -11,13 +11,17 @@ import net.minecraftforge.registries.RegistryObject;
 
 public class ModBlockEntities {
 
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Main.MOD_ID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
+            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Main.MOD_ID);
 
     public static final RegistryObject<BlockEntityType<CuttingTableBlockEntity>> CUTTING_TABLE =
             BLOCK_ENTITIES.register("cutting_table", () ->
                     BlockEntityType.Builder.of(CuttingTableBlockEntity::new,
                             ModBlocks.CUTTING_TABLE.get()).build(null));
-
+/*
+    public static final BlockEntityType<CuttingTableBlockEntity> CUTTING_TABLE =
+            BlockEntityType.Builder.of(CuttingTableBlockEntity::new, ModBlocks.CUTTING_TABLE.get()).build(null);
+*/
     public static void register(IEventBus eventBus){
         BLOCK_ENTITIES.register(eventBus);
     }
