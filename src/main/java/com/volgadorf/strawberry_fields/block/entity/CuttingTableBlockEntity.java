@@ -1,6 +1,7 @@
 package com.volgadorf.strawberry_fields.block.entity;
 
 import com.volgadorf.strawberry_fields.item.ModFoodItems;
+import com.volgadorf.strawberry_fields.screen.CuttingTableMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -91,8 +92,8 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int p_39954_, Inventory p_39955_, Player p_39956_) {
-        return null;
+    public AbstractContainerMenu createMenu(int id, Inventory inventory, Player p_39956_) {
+        return new CuttingTableMenu(id, inventory, this, this.data);
     }
 
     @Override
