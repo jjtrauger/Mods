@@ -1,5 +1,6 @@
 package com.volgadorf.strawberry_fields.screen;
 
+import com.volgadorf.strawberry_fields.block.ModBlocks;
 import com.volgadorf.strawberry_fields.block.entity.CuttingTableBlockEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -11,7 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.CapabilityItemHandler;
+//import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,8 +25,8 @@ public class CuttingTableMenu extends AbstractContainerMenu {
     this(id, inv, inv.player.level.getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(0));
     }
 
-    protected CuttingTableMenu(int id, Inventory inv, BlockEntity entity, ContainerData data) {
-        super (, id);
+    public CuttingTableMenu(int id, Inventory inv, BlockEntity entity, ContainerData data) {
+        super (ModMenuTypes.CUTTING_TABLE_MENU.get(), id);
         checkContainerSize(inv, 10);
         blockEntity = (CuttingTableBlockEntity) entity;
         this.level = inv.player.level;
@@ -34,19 +35,19 @@ public class CuttingTableMenu extends AbstractContainerMenu {
         addPlayerInventory(inv);
         addPlayerHotbar(inv);
 
-        //this builds the slots- need to figure expand this to make 10 and need to test what each number means
+        //this builds the slots; need to figure expand this to make 10 and need to test what each number means
         //in terms of position
         this.blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
             this.addSlot(new SlotItemHandler(handler, 0, 12, 15));
-            this.addSlot(new SlotItemHandler(handler, 1, 86, 15));
-            this.addSlot(new SlotItemHandler(handler, 2, 86, 60));
-            this.addSlot(new SlotItemHandler(handler, 3, 86, 60));
-            this.addSlot(new SlotItemHandler(handler, 4, 86, 60));
-            this.addSlot(new SlotItemHandler(handler, 5, 86, 60));
-            this.addSlot(new SlotItemHandler(handler, 6, 86, 60));
-            this.addSlot(new SlotItemHandler(handler, 7, 86, 60));
-            this.addSlot(new SlotItemHandler(handler, 8, 86, 60));
-            this.addSlot(new SlotItemHandler(handler, 9, 86, 60));
+            this.addSlot(new SlotItemHandler(handler, 1, 32, 15));
+            this.addSlot(new SlotItemHandler(handler, 2, 52, 15));
+            this.addSlot(new SlotItemHandler(handler, 3, 12, 35));
+            this.addSlot(new SlotItemHandler(handler, 4, 32, 35));
+            this.addSlot(new SlotItemHandler(handler, 5, 52, 35));
+            this.addSlot(new SlotItemHandler(handler, 6, 12, 55));
+            this.addSlot(new SlotItemHandler(handler, 7, 32, 55));
+            this.addSlot(new SlotItemHandler(handler, 8, 52, 55));
+            this.addSlot(new SlotItemHandler(handler, 9, 86, 35));
         });
 
         addDataSlots(data);
@@ -85,12 +86,53 @@ public class CuttingTableMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public ItemStack quickMoveStack(Player p_38941_, int p_38942_) {
-        return null;
+    public ItemStack quickMoveStack(Player playerIn, int index) {
+        Slot sourceSlot = slots.get(index);
+        if (sourceSlot == null || !sourceSlot.hasItem()) return ItemStack.EMPTY;  //EMPTY_ITEM
+        ItemStack sourceStack = sourceSlot.getItem();
+        ItemStack copyOfSourceStack = sourceStack.copy();
+
+        // Check if the slot clicked is one of the vanilla container slots
+        if (index < VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT) {
+            // This is a vanilla container slot so merge the stack into the tile inventory
+            if (!moveItemStackTo(sourceStack, TE_INVENTORY_FIRST_SLOT_INDEX, TE_INVENTORY_FIRST_SLOT_INDEX
+                    + TE_INVENTORY_SLOT_COUNT, false)) {
+                return ItemStack.EMPTY;  // EMPTY_ITEM
+            }
+        } else if (index < TE_INVENTORY_FIRST_SLOT_INDEX + TE_INVENTORY_SLOT_COUNT) {
+            // This is a TE slot so merge the stack into the players inventory
+            if (!moveItemStackTo(sourceStack, VANILLA_FIRST_SLOT_INDEX, VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT, false)) {
+                return ItemStack.EMPTY;
+            }
+        } else {
+            System.out.println("Invalid slotIndex:" + index);
+            return ItemStack.EMPTY;
+        }
+        // If stack size == 0 (the entire stack was moved) set slot contents to null
+        if (sourceStack.getCount() == 0) {
+            sourceSlot.set(ItemStack.EMPTY);
+        } else {
+            sourceSlot.setChanged();
+        }
+        sourceSlot.onTake(playerIn, sourceStack);
+        return copyOfSourceStack;
     }
 
     @Override
-    public boolean stillValid(Player p_38874_) {
-        return false;
+    public boolean stillValid(Player player) {
+        return stillValid(ContainerLevelAccess.create(level, blockEntity.getBlockPos()),
+                player, ModBlocks.CUTTING_TABLE.get());
+    }
+
+    public boolean isCrafting(){
+        return data.get(0) > 0;
+    }
+
+    public int getScaledProgress(){
+        int progress = this.data.get(0);
+        int maxProgress = this.data.get(1);
+        int progressArrowSize = 26;
+
+        return maxProgress != 0 && progress != 0? progress * progressArrowSize / maxProgress :0;
     }
 }

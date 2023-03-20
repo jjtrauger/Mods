@@ -15,7 +15,7 @@ public class ModMenuTypes {
     public static final DeferredRegister<MenuType<?>> MENUS =
             DeferredRegister.create(ForgeRegistries.MENU_TYPES, Main.MOD_ID);
 
-    public static final RegistryObject<MenuType<CuttingTableMenu>> GEM_INFUSING_STATION_MENU =
+    public static final RegistryObject<MenuType<CuttingTableMenu>> CUTTING_TABLE_MENU =
             registerMenuType(CuttingTableMenu::new, "cutting_table_menu");
 
     private static <T extends AbstractContainerMenu> RegistryObject<MenuType<T>>
