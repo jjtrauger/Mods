@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 public class CuttingTableScreen extends AbstractContainerScreen<CuttingTableMenu> {
 
     private static final ResourceLocation TEXTURE =
-            new ResourceLocation(Main.MOD_ID,"textures/gui/cookingbenchgui.png");
+            new ResourceLocation(Main.MOD_ID,"textures/gui/cuttingtablegui.png");
     public CuttingTableScreen(CuttingTableMenu menu, Inventory inventory, Component component) {
         super(menu, inventory, component);
     }
