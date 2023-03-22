@@ -1,5 +1,6 @@
 package com.volgadorf.strawberry_fields.block.entity;
 
+import com.volgadorf.strawberry_fields.block.ModBlocks;
 import com.volgadorf.strawberry_fields.item.ModFoodItems;
 import com.volgadorf.strawberry_fields.screen.CuttingTableMenu;
 import net.minecraft.core.BlockPos;
@@ -12,6 +13,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 //import net.minecraftforge.items.CapabilityItemHandler;
@@ -64,6 +66,7 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
 
     protected final ContainerData data;
+    //private int progress;
 
     public CuttingTableBlockEntity(BlockPos p_155229_, BlockState p_155230_) {
         super(ModBlockEntities.CUTTING_TABLE.get(), p_155229_, p_155230_);
@@ -94,6 +97,7 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inventory, Player p_39956_) {
         return new CuttingTableMenu(id, inventory, this, this.data);
+        //return new CuttingTableMenu(id, inventory);
     }
 
     @Override
@@ -120,6 +124,7 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     @Override
     protected void saveAdditional(CompoundTag nbt) {
         nbt.put("inventory", itemHandler.serializeNBT());
+        //nbt.putInt("cutting_table.progress", this.progress);
         super.saveAdditional(nbt);
     }
 
@@ -127,6 +132,7 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     public void load(CompoundTag nbt) {
         super.load(nbt);
         itemHandler.deserializeNBT(nbt.getCompound("inventory"));
+        //progress = nbt.getInt("cutting_table.progress");
     }
 
     public void drops(){
@@ -154,9 +160,9 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
 
     private static void craftItem(CuttingTableBlockEntity pEntity) {
         if (hasRecipe(pEntity)){
-            pEntity.itemHandler.extractItem(1, 1, false);
-            pEntity.itemHandler.setStackInSlot(10, new ItemStack(ModFoodItems.CHEEMS.get(),
-                    pEntity.itemHandler.getStackInSlot(10).getCount()+1));
+            pEntity.itemHandler.extractItem(1, 1, true);
+            pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModBlocks.CHEEMS_FULL.get(),
+                    pEntity.itemHandler.getStackInSlot(1).getCount()));
 
         }
     }
@@ -170,15 +176,15 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
         boolean hasPastMilk = entity.itemHandler.getStackInSlot(1).getItem() == ModFoodItems.PAST_MILK.get();
 
         return hasPastMilk && canInsertAmountIntoOutputSlot(inventory) &&
-                canInsertItemIntoOutputSlot(inventory, new ItemStack(ModFoodItems.CHEEMS.get(), 1));
+                canInsertItemIntoOutputSlot(inventory, new ItemStack(ModBlocks.CHEEMS_FULL.get(), 1));
     }
 
     private static boolean canInsertItemIntoOutputSlot(SimpleContainer inventory, ItemStack itemStack) {
-        return inventory.getItem(10).getItem() == itemStack.getItem() || inventory.getItem(10).isEmpty();
+        return inventory.getItem(9).getItem() == itemStack.getItem() || inventory.getItem(9).isEmpty();
     }
 
     private static boolean canInsertAmountIntoOutputSlot(SimpleContainer inventory) {
-        return inventory.getItem(10).getMaxStackSize() > inventory.getItem(10).getCount();
+        return inventory.getItem(9).getMaxStackSize() > inventory.getItem(9).getCount();
     }
 }
 
