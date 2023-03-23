@@ -164,6 +164,14 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
             pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModBlocks.CHEEMS_FULL.get(),
                     pEntity.itemHandler.getStackInSlot(1).getCount()));
 
+            if (pEntity.itemHandler.getStackInSlot(9).getCount() == 0){
+                onCraft(pEntity);
+            }
+        }
+    }
+    private static void onCraft(CuttingTableBlockEntity pEntity) {
+        for (int i = 0; i < 9; i++) {
+            pEntity.itemHandler.extractItem(i, 64 - pEntity.itemHandler.getStackInSlot(9).getCount(), false);
         }
     }
 
