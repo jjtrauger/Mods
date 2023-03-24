@@ -60,6 +60,45 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
         @Override
         protected void onContentsChanged(int slot) {
             super.onContentsChanged(slot);
+
+            if(level.isClientSide()){
+                return;
+            }
+
+            CuttingTableBlockEntity pEntity = CuttingTableBlockEntity.this;
+            BlockPos blockPos = CuttingTableBlockEntity.super.getBlockPos();
+            BlockState state = CuttingTableBlockEntity.super.getBlockState();
+            if(hasRecipe(pEntity)){
+                setChanged(level, blockPos, state);
+                craftItem(pEntity);
+            }
+            else{
+                setChanged(level, blockPos, state);
+            }
+
+        }
+    };
+
+    private final ItemStackHandler itemHandler2 = new ItemStackHandler(1){
+        @Override
+        protected void onContentsChanged(int slot) {
+            super.onContentsChanged(slot);
+
+            if(level.isClientSide()){
+                return;
+            }
+
+            CuttingTableBlockEntity pEntity = CuttingTableBlockEntity.this;
+            BlockPos blockPos = CuttingTableBlockEntity.super.getBlockPos();
+            BlockState state = CuttingTableBlockEntity.super.getBlockState();
+            if(hasRecipe(pEntity)){
+                setChanged(level, blockPos, state);
+                onCraft(pEntity);
+            }
+            else{
+                setChanged(level, blockPos, state);
+            }
+
         }
     };
 
@@ -143,7 +182,7 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
         Containers.dropContents(this.level, this.worldPosition, inventory);
     }
 
-
+/*
     public static void tick(Level level, BlockPos blockPos, BlockState state, CuttingTableBlockEntity pEntity) {
         if(level.isClientSide()){
             return;
@@ -156,7 +195,7 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
         else{
             setChanged(level, blockPos, state);
         }
-    }
+    } */
 
     private static void craftItem(CuttingTableBlockEntity pEntity) {
         if (hasRecipe(pEntity)){
@@ -164,9 +203,9 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
             pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModBlocks.CHEEMS_FULL.get(),
                     pEntity.itemHandler.getStackInSlot(1).getCount()));
 
-            if (pEntity.itemHandler.getStackInSlot(9).getCount() == 0){
-                onCraft(pEntity);
-            }
+           // if (pEntity.itemHandler.getStackInSlot(9).getCount() == 0){
+            //    onCraft(pEntity);
+            //}
         }
     }
     private static void onCraft(CuttingTableBlockEntity pEntity) {
@@ -174,6 +213,8 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
             pEntity.itemHandler.extractItem(i, 64 - pEntity.itemHandler.getStackInSlot(9).getCount(), false);
         }
     }
+
+
 
     private static boolean hasRecipe(CuttingTableBlockEntity entity) {
         SimpleContainer inventory = new SimpleContainer(entity.itemHandler.getSlots());
