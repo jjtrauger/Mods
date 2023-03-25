@@ -3,6 +3,9 @@ package com.volgadorf.strawberry_fields;
 
 import com.volgadorf.strawberry_fields.block.ModBlocks;
 import com.volgadorf.strawberry_fields.block.entity.ModBlockEntities;
+import com.volgadorf.strawberry_fields.screen.CuttingTableScreen;
+import com.volgadorf.strawberry_fields.screen.ModMenuTypes;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.world.item.ItemStack;
@@ -31,9 +34,12 @@ public class Main {
 
     public Main() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
         ModFoodItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+        ModMenuTypes.register(modEventBus);
+
         modEventBus.addListener(this::commonSetup);
 
         //modEventBus.addListener(this::addCreative);
@@ -83,7 +89,7 @@ public class Main {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-
+            MenuScreens.register(ModMenuTypes.CUTTING_TABLE_MENU.get(), CuttingTableScreen::new);
         }
     }
 }

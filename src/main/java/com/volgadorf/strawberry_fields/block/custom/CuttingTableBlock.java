@@ -73,10 +73,10 @@ public class CuttingTableBlock extends BaseEntityBlock{
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new CuttingTableBlockEntity(pos, state);
     }
-
+/*
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return createTickerHelper(type, ModBlockEntities.CUTTING_TABLE.get(), CuttingTableBlockEntity::tick);
-    }
+        return createTickerHelper(type, ModBlockEntities.CUTTING_TABLE.get(), CuttingTableBlockEntity);
+    } */
 }

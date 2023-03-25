@@ -169,6 +169,10 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
             return lazyItemHandler.cast();
         }
 
+        else if (cap == ForgeCapabilities.ITEM_HANDLER) {
+            return lazyItemHandler2.cast();
+    }
+
         return super.getCapability(cap, side);
     }
 
