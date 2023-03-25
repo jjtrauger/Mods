@@ -91,8 +91,24 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
             CuttingTableBlockEntity pEntity = CuttingTableBlockEntity.this;
             BlockPos blockPos = CuttingTableBlockEntity.super.getBlockPos();
             BlockState state = CuttingTableBlockEntity.super.getBlockState();
-            if(hasRecipe(pEntity)){
+
+
+            //if hasrecipe, check the lowest count in all crafting slots
+
+            if(hasRecipe(pEntity) ){
                 setChanged(level, blockPos, state);
+
+                int lowest = 64;
+                for (int j = 0; j < 9; j++){
+                    if (pEntity.itemHandler.getStackInSlot(j).getCount() <= lowest && pEntity.itemHandler.getStackInSlot(j).getCount() != 0){
+                        lowest = pEntity.itemHandler.getStackInSlot(j).getCount();
+                    }
+
+                }
+                //now make sure the amount of output items is at most, that of the lowest amount of recipe items
+                pEntity.itemHandler2.getStackInSlot(0).setCount(lowest);
+
+                //need to now extract the items
                 onCraft(pEntity);
             }
             else{
