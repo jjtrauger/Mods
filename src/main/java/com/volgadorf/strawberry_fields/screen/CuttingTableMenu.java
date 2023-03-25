@@ -33,13 +33,14 @@ public class CuttingTableMenu extends AbstractContainerMenu {
     private final Level level;
     private final ContainerData data;
 
-    protected CuttingTableMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
-        this(id, inv, inv.player.level.getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(0));
+    protected CuttingTableMenu(int id, Inventory inv, Inventory inv2, FriendlyByteBuf extraData) {
+        this(id, inv, inv2, inv.player.level.getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(0));
     }
 
-    public CuttingTableMenu(int id, Inventory inv, BlockEntity entity, ContainerData data) {
+    public CuttingTableMenu(int id, Inventory inv, Inventory inv2, BlockEntity entity, ContainerData data) {
         super(ModMenuTypes.CUTTING_TABLE_MENU.get(), id);
-        checkContainerSize(inv, 10);
+        checkContainerSize(inv, 9);
+        checkContainerSize(inv2, 1);
         blockEntity = (CuttingTableBlockEntity) entity;
         this.level = inv.player.level;
         this.data = data;
@@ -298,6 +299,7 @@ public class CuttingTableMenu extends RecipeBookMenu<CraftingContainer> {
     public boolean stillValid(Player p_39368_) {
         return stillValid(this.access, p_39368_, Blocks.CRAFTING_TABLE);
     }
+
 
 
     public boolean canTakeItemForPickAll(ItemStack p_39381_, Slot p_39382_) {
