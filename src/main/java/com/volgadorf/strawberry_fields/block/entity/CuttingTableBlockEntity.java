@@ -56,72 +56,77 @@ import java.util.Optional;
 
 public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider {
 
-    private final ItemStackHandler itemHandler = new ItemStackHandler(9){
+    private final ItemStackHandler itemHandler = new ItemStackHandler(10){
+
         @Override
         protected void onContentsChanged(int slot) {
             super.onContentsChanged(slot);
+
+            CuttingTableBlockEntity pEntity = CuttingTableBlockEntity.this;
+            BlockPos blockPos = CuttingTableBlockEntity.this.getBlockPos();
+            BlockState state = CuttingTableBlockEntity.this.getBlockState();
 
             if(level.isClientSide()){
                 return;
             }
 
-            CuttingTableBlockEntity pEntity = CuttingTableBlockEntity.this;
-            BlockPos blockPos = CuttingTableBlockEntity.super.getBlockPos();
-            BlockState state = CuttingTableBlockEntity.super.getBlockState();
-            if(hasRecipe(pEntity)){
-                setChanged(level, blockPos, state);
-                craftItem(pEntity);
-            }
-            else{
-                setChanged(level, blockPos, state);
-            }
 
-        }
-    };
+            if (hasRecipe(pEntity)) {
+                    setChanged(level, blockPos, state);
 
-    private final ItemStackHandler itemHandler2 = new ItemStackHandler(1){
-        @Override
-        protected void onContentsChanged(int slot) {
-            super.onContentsChanged(slot);
-
-            if(level.isClientSide()){
-                return;
-            }
-
-            CuttingTableBlockEntity pEntity = CuttingTableBlockEntity.this;
-            BlockPos blockPos = CuttingTableBlockEntity.super.getBlockPos();
-            BlockState state = CuttingTableBlockEntity.super.getBlockState();
-
-
-            //if hasrecipe, check the lowest count in all crafting slots
-
-            if(hasRecipe(pEntity) ){
-                setChanged(level, blockPos, state);
-
-                int lowest = 64;
-                for (int j = 0; j < 9; j++){
-                    if (pEntity.itemHandler.getStackInSlot(j).getCount() <= lowest && pEntity.itemHandler.getStackInSlot(j).isEmpty() == false){
-                        lowest = pEntity.itemHandler.getStackInSlot(j).getCount();
+                    //get the lowest possible output from the lowest input slot count, we know it isnt 0 because hasRecipe
+                    int lowest = 64;
+                    for (int i = 0; i < 9; i++){
+                        if (pEntity.itemHandler.getStackInSlot(i).getCount() <= lowest && !pEntity.itemHandler.getStackInSlot(i).isEmpty()){
+                            lowest = pEntity.itemHandler.getStackInSlot(i).getCount();
+                        }
                     }
 
-                }
-                //now make sure the amount of output items is at most, that of the lowest amount of recipe items
+                    //only if the output doesnt equal the lowest input, craft the item
+                    if (lowest != pEntity.itemHandler.getStackInSlot(9).getCount()) {
+                        craftItem(pEntity, lowest);
+                    }
 
-                //need to make sure this accounts for max stack sizes
-                pEntity.itemHandler2.getStackInSlot(0).setCount(lowest);
+            } else{
+                    //if no recipe, no output
+                    pEntity.itemHandler.extractItem(9, pEntity.itemHandler.getStackInSlot(9).getCount(), false);
 
-                //need to now extract the items
-                onCraft(pEntity);
-            }
-            else{
                 setChanged(level, blockPos, state);
             }
 
         }
+/*
+        @Override
+        public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
+            if (slot == pEntity.itemHandler.getSlots() - 1){
+                for (int i = 0; i < pEntity.itemHandler.getSlots() - 1; i++){
+                    pEntity.itemHandler.extractItem(i, amount, false);
+                }
+            }
+            return super.extractItem(slot, amount, simulate);
+        } */
     };
 
+    private static void craftItem(CuttingTableBlockEntity pEntity, int lowest) {
+        if (hasRecipe(pEntity)){
+            //pEntity.itemHandler.extractItem(1, 1, true);
+            pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModBlocks.CHEEMS_FULL.get(),
+                    lowest));
+
+            // if (pEntity.itemHandler.getStackInSlot(9).getCount() == 0){
+            //    onCraft(pEntity);
+            //}
+        }
+    }
+
+
+    private static void onCraft(CuttingTableBlockEntity pEntity) {
+        for (int i = 0; i < 9; i++) {
+            pEntity.itemHandler.extractItem(i, 64 - pEntity.itemHandler.getStackInSlot(1).getCount(), false);
+        }
+    }
+
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
-    private LazyOptional<IItemHandler> lazyItemHandler2 = LazyOptional.empty();
 
     protected final ContainerData data;
     //private int progress;
@@ -154,12 +159,8 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inventory,  Player p_39956_) {
-        return new CuttingTableMenu(id, inventory, this.getOutputInventory(),this, this.data);
+        return new CuttingTableMenu(id, inventory,this, this.data);
         //return new CuttingTableMenu(id, inventory);
-    }
-
-    private Inventory getOutputInventory() {
-        return new Inventory(itemHandler2);
     }
 
 
@@ -169,10 +170,6 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
             return lazyItemHandler.cast();
         }
 
-        else if (cap == ForgeCapabilities.ITEM_HANDLER) {
-            return lazyItemHandler2.cast();
-    }
-
         return super.getCapability(cap, side);
     }
 
@@ -180,20 +177,17 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     public void onLoad() {
         super.onLoad();
         lazyItemHandler = LazyOptional.of(() -> itemHandler);
-        lazyItemHandler2 = LazyOptional.of(() -> itemHandler2);
     }
 
     @Override
     public void invalidateCaps() {
         super.invalidateCaps();
         lazyItemHandler.invalidate();
-        lazyItemHandler2.invalidate();
     }
 
     @Override
     protected void saveAdditional(CompoundTag nbt) {
         nbt.put("inventory", itemHandler.serializeNBT());
-        nbt.put("inventory2", itemHandler2.serializeNBT());
         //nbt.putInt("cutting_table.progress", this.progress);
         super.saveAdditional(nbt);
     }
@@ -202,63 +196,40 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     public void load(CompoundTag nbt) {
         super.load(nbt);
         itemHandler.deserializeNBT(nbt.getCompound("inventory"));
-        itemHandler2.deserializeNBT(nbt.getCompound("inventory2"));
         //progress = nbt.getInt("cutting_table.progress");
     }
 
     public void drops(){
         SimpleContainer inventory = new SimpleContainer(itemHandler.getSlots());
-        SimpleContainer inventory2 = new SimpleContainer(itemHandler2.getSlots());
 
         for (int i = 0; i < itemHandler.getSlots(); i++){
             inventory.setItem(i, itemHandler.getStackInSlot(i));
         }
         Containers.dropContents(this.level, this.worldPosition, inventory);
-
-        for (int i = 0; i < itemHandler2.getSlots(); i++){
-            inventory.setItem(i, itemHandler2.getStackInSlot(i));
-        }
-        Containers.dropContents(this.level, this.worldPosition, inventory2);
-    }
-
-    private static void craftItem(CuttingTableBlockEntity pEntity) {
-        if (hasRecipe(pEntity)){
-            pEntity.itemHandler.extractItem(1, 1, true);
-            pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModBlocks.CHEEMS_FULL.get(),
-                    pEntity.itemHandler.getStackInSlot(1).getCount()));
-
-           // if (pEntity.itemHandler.getStackInSlot(9).getCount() == 0){
-            //    onCraft(pEntity);
-            //}
-        }
-    }
-    private static void onCraft(CuttingTableBlockEntity pEntity) {
-        for (int i = 0; i < 9; i++) {
-            pEntity.itemHandler.extractItem(i, 64 - pEntity.itemHandler2.getStackInSlot(0).getCount(), false);
-        }
     }
 
 
 
     private static boolean hasRecipe(CuttingTableBlockEntity entity) {
         SimpleContainer inventory = new SimpleContainer(entity.itemHandler.getSlots());
-        SimpleContainer inventory2 = new SimpleContainer(entity.itemHandler2.getSlots());
-        for (int i = 0; i < entity.itemHandler.getSlots(); i++) {
+        //-1 because last slot is output- don't count it
+        for (int i = 0; i < entity.itemHandler.getSlots() - 1; i++) {
             inventory.setItem(i, entity.itemHandler.getStackInSlot(i));
         }
 
         boolean hasPastMilk = entity.itemHandler.getStackInSlot(1).getItem() == ModFoodItems.PAST_MILK.get();
 
-        return hasPastMilk && canInsertAmountIntoOutputSlot(inventory2) &&
-                canInsertItemIntoOutputSlot(inventory2, new ItemStack(ModBlocks.CHEEMS_FULL.get(), 1));
+        return hasPastMilk && canInsertAmountIntoOutputSlot(inventory) &&
+                canInsertItemIntoOutputSlot(inventory, new ItemStack(ModBlocks.CHEEMS_FULL.get(), 1));
     }
 
     private static boolean canInsertItemIntoOutputSlot(SimpleContainer inventory, ItemStack itemStack) {
-        return inventory.getItem(0).getItem() == itemStack.getItem() || inventory.getItem(0).isEmpty();
+        return inventory.getItem(9).getItem() == itemStack.getItem() || inventory.getItem(9).isEmpty();
     }
 
     private static boolean canInsertAmountIntoOutputSlot(SimpleContainer inventory) {
-        return inventory.getItem(0).getMaxStackSize() > inventory.getItem(0).getCount();
+        //once we hit max stack size, we want it to return false
+        return inventory.getItem(9).getMaxStackSize() > inventory.getItem(9).getCount();
     }
 }
 
