@@ -11,60 +11,34 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 //import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-
-import java.util.Map;
-import java.util.Optional;
 
 public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider {
 
     private final ItemStackHandler itemHandler = new ItemStackHandler(10){
 
+        CuttingTableBlockEntity pEntity = CuttingTableBlockEntity.this;
+        BlockPos blockPos = CuttingTableBlockEntity.this.getBlockPos();
+        BlockState state = CuttingTableBlockEntity.this.getBlockState();
+
+        //currently if you take all items out the output, it removes 3 from both the input and output slots. weird
         @Override
         protected void onContentsChanged(int slot) {
             super.onContentsChanged(slot);
 
-            CuttingTableBlockEntity pEntity = CuttingTableBlockEntity.this;
-            BlockPos blockPos = CuttingTableBlockEntity.this.getBlockPos();
-            BlockState state = CuttingTableBlockEntity.this.getBlockState();
 
             if(level.isClientSide()){
                 return;
@@ -73,6 +47,8 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
 
             if (hasRecipe(pEntity)) {
                     setChanged(level, blockPos, state);
+
+                    int opAmount = pEntity.itemHandler.getStackInSlot(9).getCount(); //output slot amount
 
                     //get the lowest possible output from the lowest input slot count, we know it isnt 0 because hasRecipe
                     int lowest = 64;
@@ -83,9 +59,19 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
                     }
 
                     //only if the output doesnt equal the lowest input, craft the item
-                    if (lowest != pEntity.itemHandler.getStackInSlot(9).getCount()) {
-                        craftItem(pEntity, lowest);
+                    if (lowest < opAmount) {
+                        checkItemCount(pEntity, lowest);
                     }
+
+                    if (lowest > opAmount){
+                        if (slot == 9){
+                            onCraft(pEntity, lowest - opAmount);
+                        }
+                        else{
+                            checkItemCount(pEntity, lowest);
+                        }
+                    }
+
 
             } else{
                     //if no recipe, no output
@@ -95,34 +81,38 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
             }
 
         }
-/*
+
+        /*
         @Override
         public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-            if (slot == pEntity.itemHandler.getSlots() - 1){
-                for (int i = 0; i < pEntity.itemHandler.getSlots() - 1; i++){
-                    pEntity.itemHandler.extractItem(i, amount, false);
+
+            if (slot == pEntity.itemHandler.getSlots()-1){
+                for (int i = 0; i < 9; i++){
+                    if (pEntity.itemHandler.getStackInSlot(i).getCount() >= amount && !pEntity.itemHandler.getStackInSlot(i).isEmpty()){
+                        pEntity.itemHandler.extractItem(i, amount, false);
+                    }
                 }
+                return super.extractItem(slot, amount, simulate);
             }
+
             return super.extractItem(slot, amount, simulate);
         } */
+
     };
 
-    private static void craftItem(CuttingTableBlockEntity pEntity, int lowest) {
+    //set output count to lowest ingredient count, if hasRecipe
+    private static void checkItemCount(CuttingTableBlockEntity pEntity, int lowest) {
         if (hasRecipe(pEntity)){
             //pEntity.itemHandler.extractItem(1, 1, true);
             pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModBlocks.CHEEMS_FULL.get(),
                     lowest));
-
-            // if (pEntity.itemHandler.getStackInSlot(9).getCount() == 0){
-            //    onCraft(pEntity);
-            //}
         }
     }
 
 
-    private static void onCraft(CuttingTableBlockEntity pEntity) {
+    private static void onCraft(CuttingTableBlockEntity pEntity, int dif) {
         for (int i = 0; i < 9; i++) {
-            pEntity.itemHandler.extractItem(i, 64 - pEntity.itemHandler.getStackInSlot(1).getCount(), false);
+            pEntity.itemHandler.extractItem(i, dif, false);
         }
     }
 
