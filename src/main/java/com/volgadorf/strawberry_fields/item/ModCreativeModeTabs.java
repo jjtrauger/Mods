@@ -29,7 +29,7 @@ public class ModCreativeModeTabs {
      VOLG_TAB = event.registerCreativeModeTab(new ResourceLocation(Main.MOD_ID, "food_tab"), builder -> builder
              .icon(() -> new ItemStack(ModFoodItems.CHEEMS.get()))
              .title(Component.translatable("creativemodetab.food_tab"))
-             .displayItems((featureFlags, output, hasOp) -> {
+             .displayItems((params, output) -> {
                  output.accept(ModFoodItems.CHEEMS.get());
                  output.accept(ModFoodItems.PAST_MILK.get());
              })
