@@ -14,6 +14,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class CuttingTableRecipe implements Recipe<SimpleContainer> {
 
@@ -21,11 +24,21 @@ public class CuttingTableRecipe implements Recipe<SimpleContainer> {
     private final ItemStack output;
     private final NonNullList<Ingredient> recipeItems;
 
-    public CuttingTableRecipe(ResourceLocation id, ItemStack output,
+    /*public CuttingTableRecipe(ResourceLocation id, ItemStack output,
                                     NonNullList<Ingredient> recipeItems) {
         this.id = id;
         this.output = output;
         this.recipeItems = recipeItems;
+
+    } */
+
+    public CuttingTableRecipe(ResourceLocation id, ItemStack output, NonNullList<Ingredient> recipeItems) {
+        this.id = id;
+        this.output = output;
+        this.recipeItems = NonNullList.withSize(9, Ingredient.EMPTY);
+        for (int i = 0; i < recipeItems.size() && i < this.recipeItems.size(); i++) {
+            this.recipeItems.set(i, recipeItems.get(i));
+        }
     }
 
 
@@ -35,7 +48,7 @@ public class CuttingTableRecipe implements Recipe<SimpleContainer> {
         if(pLevel.isClientSide()) {
             return false;
         }
-        return false;
+        return recipeItems.get(0).test(pContainer.getItem(1));
     }
 
     @Override
@@ -77,13 +90,31 @@ public class CuttingTableRecipe implements Recipe<SimpleContainer> {
 
         @Override
         public CuttingTableRecipe fromJson(ResourceLocation pRecipeId, JsonObject pSerializedRecipe) {
-            ItemStack output = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(pSerializedRecipe, "output"));
+           /* ItemStack output = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(pSerializedRecipe, "output"));
 
             JsonArray ingredients = GsonHelper.getAsJsonArray(pSerializedRecipe, "ingredients");
             NonNullList<Ingredient> inputs = NonNullList.withSize(9, Ingredient.EMPTY);
 
             for (int i = 0; i < inputs.size(); i++) {
                 inputs.set(i, Ingredient.fromJson(ingredients.get(i)));
+            }
+
+            return new CuttingTableRecipe(pRecipeId, output, inputs); */
+
+            ItemStack output = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(pSerializedRecipe, "result"));
+
+            NonNullList<Ingredient> inputs = NonNullList.create();
+            JsonArray ingredients = GsonHelper.getAsJsonArray(pSerializedRecipe, "ingredients");
+
+            for (int i = 0; i < ingredients.size(); i++) {
+                Ingredient ingredient = Ingredient.fromJson(ingredients.get(i));
+                if (!ingredient.isEmpty()) {
+                    inputs.add(ingredient);
+                }
+            }
+
+            if (inputs.isEmpty()) {
+                throw new IllegalStateException("No ingredients for shapeless recipe " + pRecipeId);
             }
 
             return new CuttingTableRecipe(pRecipeId, output, inputs);
@@ -108,12 +139,14 @@ public class CuttingTableRecipe implements Recipe<SimpleContainer> {
             for (Ingredient ing : recipe.getIngredients()) {
                 ing.toNetwork(buf);
             }
-            buf.writeItemStack(recipe.getResultItem(), false);
+            buf.writeItemStack(recipe.getResultItem(ServerLifecycleHooks.getCurrentServer().registryAccess()), false);
         }
     }
 
     public static class Type implements RecipeType<CuttingTableRecipe> {
         private Type() { }
+
+
         public static final Type INSTANCE = new Type();
         public static final String ID = "cutting_table_recipes";
     }
