@@ -39,6 +39,8 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
         protected void onContentsChanged(int slot) {
             super.onContentsChanged(slot);
 
+            String output = new String("op");
+
 
             if(level.isClientSide()){
                 return;
@@ -46,57 +48,41 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
 
 
             if (hasRecipe(pEntity)) {
-                    setChanged(level, blockPos, state);
+                setChanged(level, blockPos, state);
 
-                    int opAmount = pEntity.itemHandler.getStackInSlot(9).getCount(); //output slot amount
+                int opAmount = pEntity.itemHandler.getStackInSlot(9).getCount(); //output slot amount
 
-                    //get the lowest possible output from the lowest input slot count, we know it isnt 0 because hasRecipe
-                    int lowest = 64;
-                    for (int i = 0; i < 9; i++){
-                        if (pEntity.itemHandler.getStackInSlot(i).getCount() <= lowest && !pEntity.itemHandler.getStackInSlot(i).isEmpty()){
-                            lowest = pEntity.itemHandler.getStackInSlot(i).getCount();
-                        }
+                //get the lowest possible output from the lowest input slot count, we know it isnt 0 because hasRecipe
+                int lowest = 64;
+                for (int i = 0; i < 9; i++){
+                    if (pEntity.itemHandler.getStackInSlot(i).getCount() <= lowest && !pEntity.itemHandler.getStackInSlot(i).isEmpty()){
+                        lowest = pEntity.itemHandler.getStackInSlot(i).getCount();
                     }
+                }
 
-                    //only if the output doesnt equal the lowest input, craft the item
-                    if (lowest < opAmount) {
+                //only if the output doesnt equal the lowest input, craft the item
+                if (lowest < opAmount) {
+                    checkItemCount(pEntity, lowest);
+                }
+
+                if (lowest > opAmount){
+                    if (slot == 9){
+                        onCraft(pEntity, lowest - opAmount);
+                    }
+                    else{
                         checkItemCount(pEntity, lowest);
                     }
-
-                    if (lowest > opAmount){
-                        if (slot == 9){
-                            onCraft(pEntity, lowest - opAmount);
-                        }
-                        else{
-                            checkItemCount(pEntity, lowest);
-                        }
-                    }
+                }
 
 
             } else{
-                    //if no recipe, no output
-                    pEntity.itemHandler.extractItem(9, pEntity.itemHandler.getStackInSlot(9).getCount(), false);
+                //if no recipe, no output
+                pEntity.itemHandler.extractItem(9, pEntity.itemHandler.getStackInSlot(9).getCount(), false);
 
                 setChanged(level, blockPos, state);
             }
 
         }
-
-        /*
-        @Override
-        public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-
-            if (slot == pEntity.itemHandler.getSlots()-1){
-                for (int i = 0; i < 9; i++){
-                    if (pEntity.itemHandler.getStackInSlot(i).getCount() >= amount && !pEntity.itemHandler.getStackInSlot(i).isEmpty()){
-                        pEntity.itemHandler.extractItem(i, amount, false);
-                    }
-                }
-                return super.extractItem(slot, amount, simulate);
-            }
-
-            return super.extractItem(slot, amount, simulate);
-        } */
 
     };
 
@@ -199,19 +185,41 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     }
 
 
-
+    //method now handles shapeless crafting for milk to cheese
     private static boolean hasRecipe(CuttingTableBlockEntity entity) {
         SimpleContainer inventory = new SimpleContainer(entity.itemHandler.getSlots());
+        int nonemptySlots = 0;
+        int fullslot = 0;
         //-1 because last slot is output- don't count it
+
         for (int i = 0; i < entity.itemHandler.getSlots() - 1; i++) {
             inventory.setItem(i, entity.itemHandler.getStackInSlot(i));
+            if (!entity.itemHandler.getStackInSlot(i).isEmpty()){
+                nonemptySlots++;
+                fullslot = i;
+            }
         }
 
-        boolean hasPastMilk = entity.itemHandler.getStackInSlot(1).getItem() == ModFoodItems.PAST_MILK.get();
 
-        return hasPastMilk && canInsertAmountIntoOutputSlot(inventory) &&
+        boolean hasPastMilkOnly = entity.itemHandler.getStackInSlot(fullslot).getItem() == ModFoodItems.PAST_MILK.get() &&
+                nonemptySlots == 1;
+
+        return hasPastMilkOnly && canInsertAmountIntoOutputSlot(inventory) &&
                 canInsertItemIntoOutputSlot(inventory, new ItemStack(ModBlocks.CHEEMS_FULL.get(), 1));
     }
+
+    /*
+    public static int countEmptySlots(SimpleContainer inventory, CuttingTableBlockEntity entity){
+        int nonemptySlots = 0;
+        for (int i = 0; i < inventory.getContainerSize() - 1; i++) {
+            //inventory.setItem(i, entity.itemHandler.getStackInSlot(i));
+            if (!entity.itemHandler.getStackInSlot(i).isEmpty()){
+                nonemptySlots++;
+                //fullslot = i;
+            }
+        }
+        return (nonemptySlots);
+    } */
 
     private static boolean canInsertItemIntoOutputSlot(SimpleContainer inventory, ItemStack itemStack) {
         return inventory.getItem(9).getItem() == itemStack.getItem() || inventory.getItem(9).isEmpty();
@@ -222,5 +230,6 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
         return inventory.getItem(9).getMaxStackSize() > inventory.getItem(9).getCount();
     }
 }
+
 
 
