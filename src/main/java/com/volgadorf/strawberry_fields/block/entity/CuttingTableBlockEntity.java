@@ -28,6 +28,7 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider {
 
+
     private final ItemStackHandler itemHandler = new ItemStackHandler(10){
 
         CuttingTableBlockEntity pEntity = CuttingTableBlockEntity.this;
@@ -39,16 +40,17 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
         protected void onContentsChanged(int slot) {
             super.onContentsChanged(slot);
 
-            String output = new String("op");
-
 
             if(level.isClientSide()){
                 return;
             }
 
+            int[] code= makeCode(pEntity);
+
 
             if (hasRecipe(pEntity)) {
                 setChanged(level, blockPos, state);
+
 
                 int opAmount = pEntity.itemHandler.getStackInSlot(9).getCount(); //output slot amount
 
@@ -75,6 +77,9 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
                 }
 
 
+            } else if (slot ==9) {
+                //do nothing
+
             } else{
                 //if no recipe, no output
                 pEntity.itemHandler.extractItem(9, pEntity.itemHandler.getStackInSlot(9).getCount(), false);
@@ -86,6 +91,27 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
 
     };
 
+    private int[] makeCode(CuttingTableBlockEntity entity) {
+        //my code for recipe detection
+        //0-8 are input slots
+        //9 signifies what recipe to use
+        int[] code = new int[0];
+
+        SimpleContainer inventory = new SimpleContainer(entity.itemHandler.getSlots());
+        int nonemptySlots = 0;
+        int fullslot = 0;
+        //-1 because last slot is output- don't count it
+
+        for (int i = 0; i < entity.itemHandler.getSlots() - 1; i++) {
+            inventory.setItem(i, entity.itemHandler.getStackInSlot(i));
+            if (!entity.itemHandler.getStackInSlot(i).isEmpty()) {
+                nonemptySlots++;
+                fullslot = i;
+            }
+        }
+    }
+
+
     //set output count to lowest ingredient count, if hasRecipe
     private static void checkItemCount(CuttingTableBlockEntity pEntity, int lowest) {
         if (hasRecipe(pEntity)){
@@ -93,6 +119,7 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
             pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModBlocks.CHEEMS_FULL.get(),
                     lowest));
         }
+
     }
 
 
@@ -204,22 +231,15 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
         boolean hasPastMilkOnly = entity.itemHandler.getStackInSlot(fullslot).getItem() == ModFoodItems.PAST_MILK.get() &&
                 nonemptySlots == 1;
 
-        return hasPastMilkOnly && canInsertAmountIntoOutputSlot(inventory) &&
-                canInsertItemIntoOutputSlot(inventory, new ItemStack(ModBlocks.CHEEMS_FULL.get(), 1));
-    }
 
-    /*
-    public static int countEmptySlots(SimpleContainer inventory, CuttingTableBlockEntity entity){
-        int nonemptySlots = 0;
-        for (int i = 0; i < inventory.getContainerSize() - 1; i++) {
-            //inventory.setItem(i, entity.itemHandler.getStackInSlot(i));
-            if (!entity.itemHandler.getStackInSlot(i).isEmpty()){
-                nonemptySlots++;
-                //fullslot = i;
-            }
+        if (hasPastMilkOnly){
+            return hasPastMilkOnly && canInsertAmountIntoOutputSlot(inventory) &&
+                    canInsertItemIntoOutputSlot(inventory, new ItemStack(ModBlocks.CHEEMS_FULL.get(), 1));
         }
-        return (nonemptySlots);
-    } */
+        else{
+            return false;
+        }
+    }
 
     private static boolean canInsertItemIntoOutputSlot(SimpleContainer inventory, ItemStack itemStack) {
         return inventory.getItem(9).getItem() == itemStack.getItem() || inventory.getItem(9).isEmpty();
