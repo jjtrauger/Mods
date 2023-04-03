@@ -55,38 +55,6 @@ public class Cheems_Wheel_Block extends Block {
         return eat(p_60504_, p_60505_, p_60503_, p_60506_);
         //return super.use(p_60503_, p_60504_, p_60505_, p_60506_, p_60507_, p_60508_);
     }
-/**
-    public InteractionResult use(BlockState p_51202_, Level p_51203_, BlockPos p_51204_, Player p_51205_, InteractionHand p_51206_, BlockHitResult p_51207_) {
-        ItemStack itemstack = p_51205_.getItemInHand(p_51206_);
-        Item item = itemstack.getItem();
-        if (itemstack.is(ItemTags.CANDLES) && p_51202_.getValue(BITES) == 0) {
-            Block block = Block.byItem(item);
-            if (block instanceof CandleBlock) {
-                if (!p_51205_.isCreative()) {
-                    itemstack.shrink(1);
-                }
-
-                p_51203_.playSound((Player)null, p_51204_, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0F, 1.0F);
-                p_51203_.setBlockAndUpdate(p_51204_, CandleCakeBlock.byCandle(block));
-                p_51203_.gameEvent(p_51205_, GameEvent.BLOCK_CHANGE, p_51204_);
-                p_51205_.awardStat(Stats.ITEM_USED.get(item));
-                return InteractionResult.SUCCESS;
-            }
-        }
-
-        if (p_51203_.isClientSide) {
-            if (eat(p_51203_, p_51204_, p_51202_, p_51205_).consumesAction()) {
-                return InteractionResult.SUCCESS;
-            }
-
-            if (itemstack.isEmpty()) {
-                return InteractionResult.CONSUME;
-            }
-        }
-
-        return eat(p_51203_, p_51204_, p_51202_, p_51205_);
-    }
-**/
     protected static InteractionResult eat(LevelAccessor p_51186_, BlockPos blockPos, BlockState blockState, Player player) {
         //check if player has full hunger: if so, leave this method
         if (!player.canEat(false)) {
