@@ -65,22 +65,40 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
                 }
 
                 //only if the output doesnt equal the lowest input, craft the item
-                if (lowest < opAmount) {
-                    checkItemCount(pEntity, lowest, code);
-                }
-
-                if (lowest > opAmount){
-                    if (slot == 9){
-                        onCraft(pEntity, lowest - opAmount);
-                    }
-                    else{
+                if (code == 2){
+                    if (lowest < opAmount / 4) {
                         checkItemCount(pEntity, lowest, code);
                     }
+
+                    if (lowest > opAmount / 4){
+                        if (slot == 9){
+                            onCraft(pEntity, lowest - opAmount);
+                        }
+                        else{
+                            checkItemCount(pEntity, lowest, code);
+                        }
+                    }
                 }
+
+                else {
+                    if (lowest < opAmount) {
+                        checkItemCount(pEntity, lowest, code);
+                    }
+
+                    if (lowest > opAmount){
+                        if (slot == 9){
+                            onCraft(pEntity, lowest - opAmount);
+                        }
+                        else{
+                            checkItemCount(pEntity, lowest, code);
+                        }
+                    }
+                }
+
 
 
             } else if (slot ==9) {
-                //do nothing if player just puts a random item in the output slot
+                //do nothing if player just puts a random item in the output slot and there is no recipe
 
             } else{
                 //if no recipe, no output
@@ -141,7 +159,7 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
                 case 1: pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModBlocks.CHEEMS_FULL.get(),
                         lowest)); break;
                 case 2: pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModFoodItems.CHEEMS.get(),
-                        lowest)); break;
+                        lowest * 4)); break;
                 //case 2: pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModFoodItems.CHEEMS.get(),
                  //       (lowest <= 16) ? lowest * 4 : 64)); break;
 
