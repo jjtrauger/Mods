@@ -1,8 +1,10 @@
 {
   "item.strawberry_fields.past_milk": "Pasteurized Milk",
   "item.strawberry_fields.cheems": "Cheese Slice",
+  "item.strawberry_fields.knife": "Knife",
   "block.strawberry_fields.cheems_full": "Cheese Wheel",
   "block.strawberry_fields.cutting_table": "Cutting Table",
 
-  "creativemodetab.food_tab": "Volgy Foods"
+  "creativemodetab.food_tab": "Volgy Foods",
+  "creativemodetab.kitchen_tools_tab": "Volgy Tools"
 }
