@@ -66,16 +66,16 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
 
                 //only if the output doesnt equal the lowest input, craft the item
                 if (code == 2){
-                    if (lowest < opAmount / 4) {
+                    if (lowest < opAmount / 8) {
                         checkItemCount(pEntity, lowest, code);
                     }
 
-                    if (lowest > opAmount / 4){
+                    if (lowest > opAmount / 8){
                         if (slot == 9){
-                            onCraft(pEntity, lowest - opAmount);
+                            onCraft(pEntity, (lowest - (opAmount/8)));
                         }
                         else{
-                            checkItemCount(pEntity, lowest, code);
+                            checkItemCount(pEntity, lowest * 8, code);
                         }
                     }
                 }
@@ -154,14 +154,15 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
             //pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModBlocks.CHEEMS_FULL.get(),
                     //lowest));
 
-            //current issue: does not check if more items can be placed into output slot like hasRecipe does
             switch (code){
                 case 1: pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModBlocks.CHEEMS_FULL.get(),
                         lowest)); break;
                 case 2: pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModFoodItems.CHEEMS.get(),
-                        lowest * 4)); break;
+                        lowest * 8)); break;
+
+                //consider always setting it to 8, then dealing with oncraft differently (make it behave like logs to planks)
                 //case 2: pEntity.itemHandler.setStackInSlot(9, new ItemStack(ModFoodItems.CHEEMS.get(),
-                 //       (lowest <= 16) ? lowest * 4 : 64)); break;
+                       // (lowest <= 4) ? lowest * 4 : 16)); break;
 
                 default: break;
             }
@@ -171,9 +172,9 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
 
 
     private static void onCraft(CuttingTableBlockEntity pEntity, int dif) {
-        for (int i = 0; i < 9; i++) {
-            pEntity.itemHandler.extractItem(i, dif, false);
-        }
+            for (int i = 0; i < 9; i++) {
+                pEntity.itemHandler.extractItem(i, dif, false);
+            }
     }
 
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
@@ -252,7 +253,8 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     public void drops(){
         SimpleContainer inventory = new SimpleContainer(itemHandler.getSlots());
 
-        for (int i = 0; i < itemHandler.getSlots(); i++){
+        //-1 to prevent output from also dropping
+        for (int i = 0; i < itemHandler.getSlots() - 1; i++){
             inventory.setItem(i, itemHandler.getStackInSlot(i));
         }
         Containers.dropContents(this.level, this.worldPosition, inventory);
