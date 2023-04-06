@@ -25,13 +25,19 @@ public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, Main.MOD_ID);
 
-    public static final RegistryObject<Block> CHEEMS_FULL = registerBlock("cheems_full",
+    public static final RegistryObject<Block> CHEEMS_FULL = registerBlock2("cheems_full",
             () -> new Cheems_Wheel_Block(BlockBehaviour.Properties.of(Material.WOOL).noOcclusion()
                     .strength(1f)), ModCreativeModeTabs.VOLG_TAB);
 
     public static final RegistryObject<Block> CUTTING_TABLE = registerBlock("cutting_table",
             () -> new CuttingTableBlock(BlockBehaviour.Properties.of(Material.BAMBOO)
-                    .strength(2f).noOcclusion()), ModCreativeModeTabs.VOLG_TAB);
+                    .strength(2f).noOcclusion().noParticlesOnBreak()), ModCreativeModeTabs.VOLG_TAB);
+
+    private static <T extends Block> RegistryObject<T> registerBlock2(String name, Supplier<T> block, CreativeModeTab tab) {
+        RegistryObject<T> toReturn = BLOCKS.register(name, block);
+        registerBlockItem2(name, toReturn);
+        return toReturn;
+    }
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block, CreativeModeTab tab) {
         RegistryObject<T> toReturn = BLOCKS.register(name, block);
@@ -39,8 +45,14 @@ public class ModBlocks {
         return toReturn;
     }
 
+
+
     private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block) {
         return ModFoodItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties().stacksTo(64)));
+    }
+
+    private static <T extends Block> RegistryObject<Item> registerBlockItem2(String name, RegistryObject<T> block) {
+        return ModFoodItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties().stacksTo(8)));
     }
 
     public static void register(IEventBus eventBus) {
