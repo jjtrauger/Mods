@@ -3,6 +3,7 @@ package com.volgadorf.strawberry_fields;
 
 import com.volgadorf.strawberry_fields.block.ModBlocks;
 import com.volgadorf.strawberry_fields.block.entity.ModBlockEntities;
+import com.volgadorf.strawberry_fields.recipe.ModRecipes;
 import com.volgadorf.strawberry_fields.screen.CuttingTableScreen;
 import com.volgadorf.strawberry_fields.screen.ModMenuTypes;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -40,6 +41,8 @@ public class Main {
         ModBlockEntities.register(modEventBus);
         ModMenuTypes.register(modEventBus);
 
+        ModRecipes.register(modEventBus);
+
         modEventBus.addListener(this::commonSetup);
 
         //modEventBus.addListener(this::addCreative);
@@ -75,7 +78,11 @@ public class Main {
         }
         if(event.getTab() == ModCreativeModeTabs.VOLG_TAB) {
             event.accept(ModFoodItems.PAST_MILK);
+            event.accept(ModFoodItems.CHEEMS);
             event.accept(ModBlocks.CHEEMS_FULL);
+        }
+        if(event.getTab() == ModCreativeModeTabs.VOLG_TAB2) {
+            event.accept(ModFoodItems.KNIFE);
             event.accept(ModBlocks.CUTTING_TABLE);
         }
     }
