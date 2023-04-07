@@ -10,7 +10,8 @@
       "model": "strawberry_fields:block/cheems_half"
     },
     "cheems_bites=3": {
-      "model": "strawberry_fields:block/cheems_onefour"
+      "model": "strawberry_fields:block/cheems_onefour",
+      "y": 180
     }
 }
 }
