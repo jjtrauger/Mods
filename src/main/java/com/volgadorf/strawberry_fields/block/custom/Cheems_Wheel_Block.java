@@ -1,6 +1,11 @@
 package com.volgadorf.strawberry_fields.block.custom;
 
+import com.volgadorf.strawberry_fields.item.ModFoodItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -31,6 +36,9 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
+import java.util.List;
+import java.util.Optional;
+
 public class Cheems_Wheel_Block extends Block {
 
     public static final int MAX_CHEEMS_BITES = 3;
@@ -50,19 +58,50 @@ public class Cheems_Wheel_Block extends Block {
         return SHAPE;
     }
 
+
     @Override
     public InteractionResult use(BlockState p_60503_, Level p_60504_, BlockPos p_60505_, Player p_60506_, InteractionHand p_60507_, BlockHitResult p_60508_) {
         return eat(p_60504_, p_60505_, p_60503_, p_60506_);
         //return super.use(p_60503_, p_60504_, p_60505_, p_60506_, p_60507_, p_60508_);
     }
     protected static InteractionResult eat(LevelAccessor p_51186_, BlockPos blockPos, BlockState blockState, Player player) {
-        //check if player has full hunger: if so, leave this method
-        if (!player.canEat(false)) {
+        //check if player is using knife
+        if (player.getMainHandItem().getItem().equals(ModFoodItems.KNIFE.get())){
+            ItemStack itemStack = new ItemStack(ModFoodItems.CHEEMS.get(), 2);
+            //give player cheese slices
+            //if(player.canTakeItem(new ItemStack(ModFoodItems.CHEEMS.get()))){
+            if(player.getInventory().getFreeSlot() != -1){
+                player.getInventory().add(itemStack);
+            }
+            //no room in inventory, throw the cheese out by the player
+            else{
+                player.drop(itemStack, false);
+            }
+
+            //variable to determine what bite we are on
+            int i = blockState.getValue(CHEEMS_BITES);
+            //trigger gameEvent calling player hunger, then EAT happens, need to know block position to change the blockstate there
+            p_51186_.gameEvent(player, GameEvent.EAT, blockPos);
+            //if block is not supposed to be depleted
+            if (i < MAX_CHEEMS_BITES) {
+                //change the blockstate
+                p_51186_.setBlock(blockPos, blockState.setValue(CHEEMS_BITES, Integer.valueOf(i + 1)), 3);
+                //if block is now fully eaten
+            } else {
+                //remove the block from the game
+                p_51186_.removeBlock(blockPos, false);
+                p_51186_.gameEvent(player, GameEvent.BLOCK_DESTROY, blockPos);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        //player is not holding knife: now check if player has full hunger: if so, leave this method
+        else if (!player.canEat(false)) {
             return InteractionResult.PASS;
         //player is hungry
         } else {
             //restore player hunger and determine saturation
             player.getFoodData().eat(1, 0.2F);
+
 
             //variable to determine what bite we are on
             int i = blockState.getValue(CHEEMS_BITES);
