@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 //import net.minecraftforge.items.CapabilityItemHandler;
@@ -26,8 +27,32 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
+import java.util.Objects;
+
 public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider {
 
+    public CuttingTableBlockEntity(BlockPos pos, BlockState state) {
+
+
+        super(ModBlockEntities.CUTTING_TABLE.get(), pos, state);
+
+        this.data = new ContainerData() {
+            @Override
+            public int get(int p_39284_) {
+                return 0;
+            }
+
+            @Override
+            public void set(int p_39285_, int p_39286_) {
+
+            }
+
+            @Override
+            public int getCount() {
+                return 0;
+            }
+        };
+    }
 
     private final ItemStackHandler itemHandler = new ItemStackHandler(10){
 
@@ -35,7 +60,6 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
         BlockPos blockPos = CuttingTableBlockEntity.this.getBlockPos();
         BlockState state = CuttingTableBlockEntity.this.getBlockState();
 
-        //currently if you take all items out the output, it removes 3 from both the input and output slots. weird
         @Override
         protected void onContentsChanged(int slot) {
             super.onContentsChanged(slot);
@@ -182,25 +206,7 @@ public class CuttingTableBlockEntity extends BlockEntity implements MenuProvider
     protected final ContainerData data;
     //private int progress;
 
-    public CuttingTableBlockEntity(BlockPos p_155229_, BlockState p_155230_) {
-        super(ModBlockEntities.CUTTING_TABLE.get(), p_155229_, p_155230_);
-        this.data = new ContainerData() {
-            @Override
-            public int get(int p_39284_) {
-                return 0;
-            }
 
-            @Override
-            public void set(int p_39285_, int p_39286_) {
-
-            }
-
-            @Override
-            public int getCount() {
-                return 0;
-            }
-        };
-    }
 
     @Override
     public Component getDisplayName() {

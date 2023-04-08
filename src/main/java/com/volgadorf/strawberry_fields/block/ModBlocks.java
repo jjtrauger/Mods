@@ -31,7 +31,7 @@ public class ModBlocks {
 
     public static final RegistryObject<Block> CUTTING_TABLE = registerBlock("cutting_table",
             () -> new CuttingTableBlock(BlockBehaviour.Properties.of(Material.BAMBOO)
-                    .strength(2f).noOcclusion().noParticlesOnBreak()), ModCreativeModeTabs.VOLG_TAB);
+                    .strength(0.5f).noOcclusion().noParticlesOnBreak()), ModCreativeModeTabs.VOLG_TAB);
 
     private static <T extends Block> RegistryObject<T> registerBlock2(String name, Supplier<T> block, CreativeModeTab tab) {
         RegistryObject<T> toReturn = BLOCKS.register(name, block);

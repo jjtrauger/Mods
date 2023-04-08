@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "strawberry_fields:past_milk"
+    }
+  ],
+  "result": {
+    "item": "strawberry_fields:cheems_full",
+    "count": 1
+  }
+}

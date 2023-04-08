@@ -30,7 +30,7 @@ public class ModCreativeModeTabs {
 
 
 
-
+/*
  public void registerTabs(CreativeModeTabEvent.Register event)
  {
      VOLG_TAB = event.registerCreativeModeTab(new ResourceLocation(Main.MOD_ID, "food_tab"), builder -> builder
@@ -51,5 +51,5 @@ public class ModCreativeModeTabs {
                  output.accept(ModBlocks.CUTTING_TABLE.get().asItem());
              })
      );
- }
+ } */
 }

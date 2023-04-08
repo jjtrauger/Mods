@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "strawberry_fields:item/cutting_table_item"
-  }
+  "parent": "strawberry_fields:block/cutting_table"
 }
